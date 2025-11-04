@@ -25,37 +25,53 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { login, register, isAuthenticated } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Login form
   const {
     register: registerLogin,
     handleSubmit: handleLoginSubmit,
     formState: { errors: loginErrors },
-  } = useForm<LoginFormValues>();
+  } = useForm<LoginFormValues>({
+    defaultValues: {
+      email: "krish.jayavarapu@gmail.com",
+      password: "Krish555"
+    }
+  });
 
   // Register form
   const {
     register: registerRegister,
     handleSubmit: handleRegisterSubmit,
     formState: { errors: registerErrors },
-  } = useForm<RegisterFormValues>();
+  } = useForm<RegisterFormValues>({ defaultValues: {
+    name: "Hemakrishna",
+    email: "krish@gmail.com",
+    password: "Krish555"
+  }});
 
   if (isAuthenticated) {
     navigate('/dashboard');
   }
 
   const handleLogin = async (data: LoginFormValues) => {
+    setIsSubmitting(true)
     const { email, password } = data;
     const success = await login(email, password);
-    if (success) {
+    if (success === true) {
       toast.success('Login successful!');
       navigate('/dashboard');
-    } else {
-      toast.error('Login failed. Please try again.');
+    } else if (success){
+      toast.error(success);
     }
+    else {
+      toast.error("Something went wrong. please try again later");
+    }
+    setIsSubmitting(false);
   };
 
   const handleRegister = async (data: RegisterFormValues) => {
+    setIsSubmitting(true);
     const { name, email, password } = data;
     const success = await register(name, email, password);
     if (success === true) {
@@ -66,6 +82,7 @@ export default function Auth() {
     } else {
       toast.error('Something went wrong. Please try again');
     }
+    setIsSubmitting(false)
   };
 
   return (
@@ -115,8 +132,14 @@ export default function Auth() {
                   {loginErrors.password && <p className="text-sm text-red-500">{loginErrors.password.message}</p>}
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Login
+                <Button disabled={isSubmitting} type="submit" 
+                  className={`w-full text-white font-semibold py-2 rounded-md transition-colors ${
+                        isSubmitting
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {isSubmitting ? "Logging in..." : "Login"}
                 </Button>
               </form>
             </TabsContent>
@@ -160,8 +183,14 @@ export default function Auth() {
                   {registerErrors.password && <p className="text-sm text-red-500">{registerErrors.password.message}</p>}
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Register
+                <Button type="submit" 
+                  className={`w-full text-white font-semibold py-2 rounded-md transition-colors ${
+                        isSubmitting
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {isSubmitting ? "Registering" : "Register"}
                 </Button>
               </form>
             </TabsContent>
