@@ -33,8 +33,9 @@ export class AuthService {
     async login(dto: LoginDto) {
         const {email, password} = dto;
         const user = await this.userRepo.findOne({ where: { email }, select: ['id', 'email', 'password'] });
-        if(!user || !(await bcrypt.compare(password, user.password))) throw new UnauthorizedException("Invalid Credentials");  
-        return { user: { id: user.id, email: user.email } };     
+        if(!user || !(await bcrypt.compare(password, user.password))) throw new UnauthorizedException("Invalid Credentials");
+        const token = this.jwtService.sign({ id: user.id, email: user.email}, "7d");
+        return { user: { id: user.id, email: user.email }, token };     
     }
 
     async verifyEmail(token: string) {
